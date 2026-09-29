@@ -1,0 +1,28 @@
+{
+  "project": "_Organized Desktop/01 Net Workspaces/.netgum",
+  "id": "028086674b89",
+  "command": [
+    "dotnet",
+    "test",
+    "Netgum.sln",
+    "--configuration",
+    "Release",
+    "--no-restore",
+    "--logger",
+    "trx;LogFileName=netgum-luna-test-10.trx",
+    "--logger",
+    "console;verbosity=normal"
+  ],
+  "cwd": "C:\\Users\\Owner\\Desktop\\AstraOrganized2\\astra-remaining-improvements\\stage\\028086674b89",
+  "environmentOverrides": {
+    "DOTNET_ROLL_FORWARD": "Major"
+  },
+  "startedAt": "2026-09-12T23:14:07.603575+00:00",
+  "status": "complete",
+  "log": "luna-test-10.log",
+  "pid": 11368,
+  "exitCode": 0,
+  "passed": true,
+  "finishedAt": "2026-09-12T23:15:54.622607+00:00",
+  "elapsedSeconds": 107.01
+}

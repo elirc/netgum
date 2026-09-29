@@ -1,0 +1,42 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Netgum.Domain", "src\Netgum.Domain\Netgum.Domain.csproj", "{54C4B8CC-199E-4A59-8F77-7057CE483282}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Netgum.Application", "src\Netgum.Application\Netgum.Application.csproj", "{F7ECED31-2A17-4DC2-B051-BC1384739D44}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Netgum.Infrastructure", "src\Netgum.Infrastructure\Netgum.Infrastructure.csproj", "{F3C4D40C-BEAE-40E0-A67D-14305A707558}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Netgum.Api", "src\Netgum.Api\Netgum.Api.csproj", "{F5BB6748-8D65-499B-B32D-923DC573331A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Netgum.Tests", "tests\Netgum.Tests\Netgum.Tests.csproj", "{BB2F8C6B-5452-4D3A-B360-FE8628A2770A}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{54C4B8CC-199E-4A59-8F77-7057CE483282}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{54C4B8CC-199E-4A59-8F77-7057CE483282}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{54C4B8CC-199E-4A59-8F77-7057CE483282}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{54C4B8CC-199E-4A59-8F77-7057CE483282}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F7ECED31-2A17-4DC2-B051-BC1384739D44}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F7ECED31-2A17-4DC2-B051-BC1384739D44}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F7ECED31-2A17-4DC2-B051-BC1384739D44}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F7ECED31-2A17-4DC2-B051-BC1384739D44}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F3C4D40C-BEAE-40E0-A67D-14305A707558}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F3C4D40C-BEAE-40E0-A67D-14305A707558}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F3C4D40C-BEAE-40E0-A67D-14305A707558}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F3C4D40C-BEAE-40E0-A67D-14305A707558}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F5BB6748-8D65-499B-B32D-923DC573331A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F5BB6748-8D65-499B-B32D-923DC573331A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F5BB6748-8D65-499B-B32D-923DC573331A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F5BB6748-8D65-499B-B32D-923DC573331A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BB2F8C6B-5452-4D3A-B360-FE8628A2770A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BB2F8C6B-5452-4D3A-B360-FE8628A2770A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BB2F8C6B-5452-4D3A-B360-FE8628A2770A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BB2F8C6B-5452-4D3A-B360-FE8628A2770A}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

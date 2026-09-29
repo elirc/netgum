@@ -1,0 +1,52 @@
+@host = https://localhost:7042
+
+### Register creator
+POST {{host}}/api/creators
+Content-Type: application/json
+
+{
+  "displayName": "Ada Goods",
+  "slug": "ada-goods",
+  "supportEmail": "ada@example.com"
+}
+
+### Create product
+POST {{host}}/api/products
+Content-Type: application/json
+
+{
+  "creatorId": "REPLACE_WITH_CREATOR_ID",
+  "name": "Indie SaaS Playbook",
+  "slug": "indie-saas-playbook",
+  "description": "A practical guide for solo founders.",
+  "price": 49,
+  "currency": "USD",
+  "fileName": "playbook.pdf",
+  "storageKey": "products/playbook.pdf",
+  "contentType": "application/pdf",
+  "sizeBytes": 42000
+}
+
+### Publish product
+POST {{host}}/api/products/REPLACE_WITH_PRODUCT_ID/publish
+
+### Create checkout
+POST {{host}}/api/checkout
+Content-Type: application/json
+
+{
+  "creatorSlug": "ada-goods",
+  "productSlug": "indie-saas-playbook",
+  "variantId": null,
+  "couponCode": null,
+  "customerEmail": "reader@example.com",
+  "customerName": "Reader Person"
+}
+
+### Complete checkout
+POST {{host}}/api/checkout/complete
+Content-Type: application/json
+
+{
+  "paymentIntentId": "REPLACE_WITH_PAYMENT_INTENT_ID"
+}

@@ -1,0 +1,35 @@
+using System.Net.Mail;
+
+using Netgum.Domain.Abstractions;
+
+namespace Netgum.Domain.ValueObjects;
+
+public sealed record EmailAddress
+{
+    private EmailAddress(string value)
+    {
+        Value = value;
+    }
+
+    public string Value { get; }
+
+    public static EmailAddress Create(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            throw new DomainException("Email address is required.");
+        }
+
+        try
+        {
+            var address = new MailAddress(value.Trim());
+            return new EmailAddress(address.Address.ToLowerInvariant());
+        }
+        catch (FormatException ex)
+        {
+            throw new DomainException("Email address is not valid.") from ex;
+        }
+    }
+
+    public override string ToString() => Value;
+}

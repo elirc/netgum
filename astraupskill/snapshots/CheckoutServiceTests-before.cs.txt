@@ -1,0 +1,84 @@
+using FluentAssertions;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging.Abstractions;
+
+using Netgum.Application.Abstractions;
+using Netgum.Application.Checkout;
+using Netgum.Domain.Creators;
+using Netgum.Domain.Products;
+using Netgum.Domain.ValueObjects;
+using Netgum.Infrastructure;
+using Netgum.Infrastructure.Email;
+using Netgum.Infrastructure.Payments;
+using Netgum.Infrastructure.Persistence;
+
+namespace Netgum.Tests.Application;
+
+public sealed class CheckoutServiceTests
+{
+    [Fact]
+    public async Task Checkout_session_creates_pending_order_and_completion_fulfills_it()
+    {
+        await using var dbContext = CreateDbContext();
+        var creator = Creator.Register("Ada Goods", "ada-goods", "ada@example.com");
+        var product = Product.Create(
+            creator.Id,
+            "Indie SaaS Playbook",
+            "indie-saas-playbook",
+            "A practical guide for solo founders.",
+            Money.Create(49m, "USD"));
+        product.AddAsset("playbook.pdf", "products/playbook.pdf", "application/pdf", 42_000);
+        product.Publish(DateTimeOffset.UtcNow);
+
+        dbContext.Creators.Add(creator);
+        dbContext.Products.Add(product);
+        await dbContext.SaveChangesAsync();
+
+        var service = CreateService(dbContext);
+        var checkout = await service.CreateSessionAsync(
+            new CreateCheckoutRequest(
+                "ada-goods",
+                "indie-saas-playbook",
+                null,
+                null,
+                "reader@example.com",
+                "Reader Person"),
+            CancellationToken.None);
+
+        checkout.Total.Should().Be(51.45m);
+        checkout.PaymentIntentId.Should().StartWith("fake_pi_");
+
+        var receipt = await service.CompleteOrderAsync(
+            new CompleteOrderRequest(checkout.PaymentIntentId),
+            CancellationToken.None);
+
+        receipt.PaymentStatus.Should().Be(Netgum.Domain.Orders.PaymentStatus.Paid);
+        receipt.OrderStatus.Should().Be(Netgum.Domain.Orders.OrderStatus.Fulfilled);
+        receipt.LicenseKey.Should().NotBeNullOrWhiteSpace();
+    }
+
+    private static NetgumDbContext CreateDbContext()
+    {
+        var options = new DbContextOptionsBuilder<NetgumDbContext>()
+            .UseInMemoryDatabase(Guid.NewGuid().ToString("N"))
+            .Options;
+
+        return new NetgumDbContext(options);
+    }
+
+    private static CheckoutService CreateService(NetgumDbContext dbContext)
+    {
+        IOrderRepository orders = new OrderRepository(dbContext);
+        IProductRepository products = new ProductRepository(dbContext);
+        IPaymentGateway payments = new FakePaymentGateway();
+        IEmailSender email = new ConsoleEmailSender(NullLogger<ConsoleEmailSender>.Instance);
+
+        return new CheckoutService(
+            new SystemClock(),
+            email,
+            orders,
+            payments,
+            products,
+            dbContext);
+    }
+}

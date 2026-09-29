@@ -1,0 +1,31 @@
+# 2. Concepts
+
+Checkout crosses four boundaries: typed request input, domain state, external provider, and persistence. Deterministic validation belongs before the provider because a provider call can create a real charge intent. Tracked aggregate mutation belongs after the candidate order is valid because EF is observing the same object that the test holds. The safe ordering is validate customer, load and validate product/variant, calculate coupon at one captured time, call the gateway, revalidate after the await, construct the order with the payment ID, then reserve inventory, redeem the coupon, add the order, and save.
+
+`Product.ValidatePurchase` is a domain preflight, not a duplicate test rule. It checks publication, variant existence, active status, and stock without decrementing. `ProductVariant.ValidateReservation` exposes the existing `ReserveOne` rules as a non-mutating check. The service still calls `ReserveInventory` later, so a concurrent caller can change state between check and mutation. The code documents that this is not a distributed stock reservation; a relational transaction or atomic update would be a separate design.
+
+`Order.ValidateCustomer` runs the actual `EmailAddress.Create` parser and name requirement before the gateway. Tests therefore exercise the same rule used by `Order.CreatePending`. The production constructor invokes the preflight again because a domain constructor must remain safe when called directly. Repeating a pure check is less risky than copying an email grammar into application tests.
+
+Money calculations are deterministic once the product, variant, and coupon are known. The coupon calculation uses a captured `now`; calling `_clock.UtcNow` at each line could cross an expiry boundary. An expired coupon throws before payment, inventory, and redemption. A missing coupon code remains the existing behavior: `FindCoupon` returns null and the order has no discount.
+
+Terminal completion is a persisted state machine. Pending can become Paid or Failed. Paid completion should return the existing receipt without asking the provider again, saving again, or sending another email. Failed completion should do the same. The service loads the product name for a paid receipt, but it does not repeat provider or email work. `MarkPaid` remains domain-idempotent, while the service-level early return prevents duplicate side effects. `MarkPaymentFailed` is called only on the first failed provider result, so its pending-only guard remains meaningful.
+
+The fake gateway is not a payment processor. It returns predictable IDs and status; the console sender is not an email provider. Counting doubles show call ordering and duplication in unit tests. EF InMemory tracks objects and accepts operations that a relational database may reject. A successful test proves application behavior against this test provider, not a distributed transaction.
+
+A future production command would need idempotency keys, seller/customer authorization, provider webhook signature verification, atomic stock constraints, and an outbox for email. This change deliberately leaves those concerns in the limits instead of claiming that a preflight is a transaction.
+
+
+## Exceptions carry a cause
+
+`EmailAddress.Create` translates a low-level `FormatException` from `MailAddress` into the domain's own `DomainException`. Translating is right — callers of a domain type should not have to catch `System.Net.Mail` types — but throwing the new exception without the old one erases the diagnosis. C# expresses "this failure was caused by that one" with the two-argument constructor, `new DomainException("Email address is not valid.", ex)`, which sets `Exception.InnerException`; ASP.NET Core's developer exception page, `ILogger` and a `.ToString()` in a log all walk that chain and print both frames. (Python writes the same idea as `raise DomainException(...) from ex`; C# has no `from` clause, and `throw ...;` inside a `catch` block without the argument simply loses the cause.) Use the plain one-argument constructor only when there is no underlying exception, as in the blank-address guard.
+
+## From EF InMemory to a real database
+
+Every lesson above is about ordering work inside one `SaveChangesAsync`. On a relational provider the same code gains guarantees the InMemory provider cannot give you, and you should know which is which before you copy this shape into a job:
+
+- **Atomicity.** `SaveChangesAsync` on SQL Server/PostgreSQL wraps all tracked changes in one transaction, so "add the order, decrement the variant, increment the coupon" either all land or none do. InMemory applies them one by one with no rollback. If you need several `SaveChangesAsync` calls (for example a save plus an audit write) to be atomic, open the transaction yourself: `await using var tx = await dbContext.Database.BeginTransactionAsync(ct); ...; await tx.CommitAsync(ct);`.
+- **Stock as a database invariant.** The post-await `ValidatePurchase` narrows the race but does not close it; two requests can both read `StockQuantity = 1`. Relationally you close it with a conditional update the database evaluates: `await dbContext.Variants.Where(v => v.Id == id && v.StockQuantity > 0).ExecuteUpdateAsync(s => s.SetProperty(v => v.StockQuantity, v => v.StockQuantity - 1), ct);` and treat an affected-row count of `0` as "sold out". A `CHECK (StockQuantity >= 0)` constraint makes the invariant true even for code that forgets.
+- **Lost-update protection.** Add a concurrency token (`[Timestamp] public byte[] RowVersion { get; set; }` on SQL Server, or `Property(x => x.Version).IsRowVersion()`), and EF appends `WHERE RowVersion = @original` to every `UPDATE`; a mismatch raises `DbUpdateConcurrencyException`, which is the 409/412 you return to an API caller.
+- **Uniqueness and foreign keys.** A unique index on `(OrderId)` or on a payment-intent id turns "we already created this order" into a `DbUpdateException` you can catch, which is how idempotency is usually enforced once more than one process is running. InMemory accepts the duplicate silently.
+
+None of that is implemented here, which is exactly why the tests assert call counts and tracked fields rather than claiming transactional safety.

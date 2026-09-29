@@ -1,0 +1,153 @@
+using Netgum.Application.Abstractions;
+using Netgum.Domain.Abstractions;
+using Netgum.Domain.Orders;
+using Netgum.Domain.ValueObjects;
+
+namespace Netgum.Application.Checkout;
+
+public sealed class CheckoutService
+{
+    private const decimal PlatformFeeRate = 0.05m;
+
+    private readonly IClock _clock;
+    private readonly IEmailSender _emailSender;
+    private readonly IOrderRepository _orders;
+    private readonly IPaymentGateway _payments;
+    private readonly IProductRepository _products;
+    private readonly IUnitOfWork _unitOfWork;
+
+    public CheckoutService(
+        IClock clock,
+        IEmailSender emailSender,
+        IOrderRepository orders,
+        IPaymentGateway payments,
+        IProductRepository products,
+        IUnitOfWork unitOfWork)
+    {
+        _clock = clock;
+        _emailSender = emailSender;
+        _orders = orders;
+        _payments = payments;
+        _products = products;
+        _unitOfWork = unitOfWork;
+    }
+
+    public async Task<CheckoutSessionResponse> CreateSessionAsync(CreateCheckoutRequest request, CancellationToken cancellationToken)
+    {
+        var now = _clock.UtcNow;
+        Order.ValidateCustomer(request.CustomerEmail, request.CustomerName);
+        var product = await _products
+            .GetPublishedBySlugAsync(request.CreatorSlug, request.ProductSlug, cancellationToken)
+            .ConfigureAwait(false)
+            ?? throw new DomainException("Published product was not found.");
+
+        product.ValidatePurchase(request.VariantId);
+        var subtotal = product.CalculateSubtotal(request.VariantId);
+        var coupon = product.FindCoupon(request.CouponCode);
+        var discount = coupon?.CalculateDiscount(subtotal, now) ?? Money.Create(0, subtotal.Currency);
+        var platformFee = subtotal.Subtract(discount).Multiply(PlatformFeeRate);
+
+        var orderId = Guid.NewGuid();
+        var paymentIntent = await _payments.CreatePaymentIntentAsync(
+            new PaymentIntentRequest(
+                orderId,
+                subtotal.Subtract(discount).Add(platformFee),
+                request.CustomerEmail,
+                product.Name),
+            cancellationToken).ConfigureAwait(false);
+
+        product.ValidatePurchase(request.VariantId);
+        if (coupon is not null && !coupon.CanRedeem(now))
+        {
+            throw new DomainException("Coupon is not redeemable.");
+        }
+
+        var order = Order.CreatePending(
+            orderId,
+            product.Id,
+            product.CreatorId,
+            request.VariantId,
+            request.CustomerEmail,
+            request.CustomerName,
+            subtotal,
+            discount,
+            platformFee,
+            paymentIntent.Id,
+            now);
+
+        product.ReserveInventory(request.VariantId);
+        coupon?.MarkRedeemed(now);
+
+        _orders.Add(order);
+        await _unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
+        return new CheckoutSessionResponse(
+            order.Id,
+            order.PaymentIntentId,
+            paymentIntent.CheckoutUrl,
+            order.Subtotal.Amount,
+            order.Discount.Amount,
+            order.PlatformFee.Amount,
+            order.Total.Amount,
+            order.Currency);
+    }
+
+    public async Task<OrderReceiptResponse> CompleteOrderAsync(CompleteOrderRequest request, CancellationToken cancellationToken)
+    {
+        var order = await _orders.GetByPaymentIntentIdAsync(request.PaymentIntentId, cancellationToken).ConfigureAwait(false)
+            ?? throw new DomainException("Order was not found for payment intent.");
+
+        // Order the reads by what each branch actually needs: the failed receipt never uses
+        // the product name, so do not pay for that query before the terminal check.
+        if (order.PaymentStatus == PaymentStatus.Failed)
+        {
+            return ToReceipt(order, "Unknown product");
+        }
+
+        var product = await _products.GetByIdAsync(order.ProductId, cancellationToken).ConfigureAwait(false);
+        var productName = product?.Name ?? "Purchased product";
+        if (order.PaymentStatus == PaymentStatus.Paid)
+        {
+            return ToReceipt(order, productName);
+        }
+
+        var status = await _payments.GetPaymentIntentStatusAsync(order.PaymentIntentId, cancellationToken).ConfigureAwait(false);
+        if (status == PaymentIntentStatus.Failed)
+        {
+            order.MarkPaymentFailed();
+            await _unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            return ToReceipt(order, "Unknown product");
+        }
+
+        if (status != PaymentIntentStatus.Succeeded)
+        {
+            throw new DomainException("Payment has not succeeded yet.");
+        }
+
+        order.MarkPaid(_clock.UtcNow);
+        await _unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
+        await _emailSender.SendPurchaseReceiptAsync(
+            new PurchaseReceiptEmail(
+                order.CustomerEmail.Value,
+                productName,
+                order.LicenseKey,
+                $"/api/orders/{order.Id}/download",
+                order.Total.Amount,
+                order.Currency),
+            cancellationToken).ConfigureAwait(false);
+
+        return ToReceipt(order, productName);
+    }
+
+    private static OrderReceiptResponse ToReceipt(Order order, string productName) =>
+        new(
+            order.Id,
+            productName,
+            order.CustomerEmail.Value,
+            order.LicenseKey,
+            order.Total.Amount,
+            order.Currency,
+            order.PaymentStatus,
+            order.Status);
+}

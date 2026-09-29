@@ -1,0 +1,23 @@
+{
+  "project": "_Organized Desktop/01 Net Workspaces/.netgum",
+  "id": "028086674b89",
+  "command": [
+    "dotnet",
+    "build",
+    "Netgum.sln",
+    "--configuration",
+    "Release",
+    "--no-restore",
+    "--disable-build-servers"
+  ],
+  "cwd": "C:\\Users\\Owner\\Desktop\\AstraOrganized2\\astra-remaining-improvements\\stage\\028086674b89",
+  "environmentOverrides": {},
+  "startedAt": "2026-09-12T23:17:20.337444+00:00",
+  "status": "complete",
+  "log": "root-build-01.log",
+  "pid": 13624,
+  "exitCode": 0,
+  "passed": true,
+  "finishedAt": "2026-09-12T23:19:12.567091+00:00",
+  "elapsedSeconds": 112.23
+}

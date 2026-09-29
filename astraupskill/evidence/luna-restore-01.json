@@ -1,0 +1,21 @@
+{
+  "project": "_Organized Desktop/01 Net Workspaces/.netgum",
+  "id": "028086674b89",
+  "command": [
+    "dotnet",
+    "restore",
+    "Netgum.sln"
+  ],
+  "cwd": "C:\\Users\\Owner\\Desktop\\AstraOrganized2\\astra-remaining-improvements\\stage\\028086674b89",
+  "environmentOverrides": {
+    "DOTNET_ROLL_FORWARD": "Major"
+  },
+  "startedAt": "2026-09-12T22:46:18.079456+00:00",
+  "status": "complete",
+  "log": "luna-restore-01.log",
+  "pid": 25524,
+  "exitCode": 0,
+  "passed": true,
+  "finishedAt": "2026-09-12T22:47:40.795851+00:00",
+  "elapsedSeconds": 82.71
+}

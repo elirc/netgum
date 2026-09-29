@@ -1,0 +1,12 @@
+{
+  "passed": true,
+  "total": 11,
+  "tests": 11,
+  "failed": 0,
+  "checks": [
+    "luna-restore-01",
+    "luna-test-10",
+    "root-build-01"
+  ],
+  "scope": "Eight application cases using real repositories and EF InMemory with counting gateway/email/unit-of-work doubles, plus three domain cases. Release solution build passed. net8 tests ran with Major roll-forward on net10; no relational transaction or real provider test."
+}

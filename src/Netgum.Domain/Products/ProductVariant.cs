@@ -1,0 +1,78 @@
+using Netgum.Domain.Abstractions;
+using Netgum.Domain.ValueObjects;
+
+namespace Netgum.Domain.Products;
+
+public sealed class ProductVariant : Entity<Guid>
+{
+    private ProductVariant()
+        : base(Guid.Empty)
+    {
+        Name = string.Empty;
+        AdditionalPrice = Money.ZeroUsd;
+    }
+
+    internal ProductVariant(Guid id, string name, Money additionalPrice, int? stockQuantity)
+        : base(id)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            throw new DomainException("Variant name is required.");
+        }
+
+        if (stockQuantity < 0)
+        {
+            throw new DomainException("Variant stock cannot be negative.");
+        }
+
+        Name = name.Trim();
+        AdditionalPrice = additionalPrice;
+        StockQuantity = stockQuantity;
+        IsActive = true;
+    }
+
+    public Guid ProductId { get; private set; }
+
+    public string Name { get; private set; }
+
+    public Money AdditionalPrice { get; private set; }
+
+    public int? StockQuantity { get; private set; }
+
+    public bool IsActive { get; private set; }
+
+    public void ReserveOne()
+    {
+        if (!IsActive)
+        {
+            throw new DomainException("Variant is not active.");
+        }
+
+        if (StockQuantity is null)
+        {
+            return;
+        }
+
+        if (StockQuantity <= 0)
+        {
+            throw new DomainException("Variant is sold out.");
+        }
+
+        StockQuantity--;
+    }
+
+    public void ValidateReservation()
+    {
+        if (!IsActive)
+        {
+            throw new DomainException("Variant is not active.");
+        }
+
+        if (StockQuantity is <= 0)
+        {
+            throw new DomainException("Variant is sold out.");
+        }
+    }
+
+    public void Deactivate() => IsActive = false;
+}

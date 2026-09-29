@@ -1,0 +1,94 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TestRun id="69042d73-3ec5-4f18-ae3e-43ac1051ebc0" name="Owner@DESKTOP-T0PFEUT 2026-09-12 16:15:33" runUser="DESKTOP-T0PFEUT\Owner" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
+  <Times creation="2026-09-12T16:15:33.2868371-07:00" queuing="2026-09-12T16:15:33.2868381-07:00" start="2026-09-12T16:15:20.1900714-07:00" finish="2026-09-12T16:15:50.0589682-07:00" />
+  <TestSettings name="default" id="9154856c-2082-42a9-8325-cfcc595b2c46">
+    <Deployment runDeploymentRoot="Owner_DESKTOP-T0PFEUT_2026-09-12_16_15_33" />
+  </TestSettings>
+  <Results>
+    <UnitTestResult executionId="087e6223-389c-4da7-8122-37e029872591" testId="0702bc43-ecda-2331-527c-8a943627406d" testName="Netgum.Tests.Application.CheckoutServiceTests.SoldOutVariant_DoesNotCallGatewayOrChangeTrackedInventory" computerName="DESKTOP-T0PFEUT" duration="00:00:00.0157496" startTime="2026-09-12T16:15:48.9499652-07:00" endTime="2026-09-12T16:15:48.9499662-07:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="087e6223-389c-4da7-8122-37e029872591" />
+    <UnitTestResult executionId="8819c1ac-e17f-40ff-9b6e-274b4ba14606" testId="0f75b73c-39ae-3fda-b623-c7eef4a041b6" testName="Netgum.Tests.Application.CheckoutServiceTests.FailedCompletion_IsTerminalWithoutDuplicateProviderCall" computerName="DESKTOP-T0PFEUT" duration="00:00:00.0296243" startTime="2026-09-12T16:15:48.9805889-07:00" endTime="2026-09-12T16:15:48.9805900-07:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="8819c1ac-e17f-40ff-9b6e-274b4ba14606" />
+    <UnitTestResult executionId="72f62673-a948-4802-b8ea-49970a13e192" testId="c87c00e6-5913-29ec-57e2-e7f4d5a34aa9" testName="Netgum.Tests.Application.CheckoutServiceTests.ExpiredCoupon_DoesNotCallGatewayOrRedeemCoupon" computerName="DESKTOP-T0PFEUT" duration="00:00:00.0168914" startTime="2026-09-12T16:15:48.9965399-07:00" endTime="2026-09-12T16:15:48.9965406-07:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="72f62673-a948-4802-b8ea-49970a13e192" />
+    <UnitTestResult executionId="d402be30-1d83-4fc8-be77-ef9058ded2c3" testId="c3e3b2ba-5ee0-c0a9-e00c-9dd7d18c5c5b" testName="Netgum.Tests.Application.CheckoutServiceTests.InactiveVariant_DoesNotCallGatewayOrChangeTrackedInventory" computerName="DESKTOP-T0PFEUT" duration="00:00:00.0240007" startTime="2026-09-12T16:15:48.9334528-07:00" endTime="2026-09-12T16:15:48.9334533-07:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="d402be30-1d83-4fc8-be77-ef9058ded2c3" />
+    <UnitTestResult executionId="af332c9a-4fda-45de-a5e0-26cb174e430a" testId="4161a339-6619-0bd6-1817-a06cd0198022" testName="Netgum.Tests.Application.CheckoutServiceTests.InvalidCustomerInput_DoesNotCallGatewayOrReserve(email: &quot;invalid-email&quot;, name: &quot;Reader Person&quot;)" computerName="DESKTOP-T0PFEUT" duration="00:00:00.3227718" startTime="2026-09-12T16:15:45.0416631-07:00" endTime="2026-09-12T16:15:45.0416643-07:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="af332c9a-4fda-45de-a5e0-26cb174e430a" />
+    <UnitTestResult executionId="7fc8f746-2546-452b-9c22-7a7742dc3234" testId="0b870ff2-a3b7-dd10-969c-541b65446f44" testName="Netgum.Tests.Domain.ProductTests.Variant_inventory_is_reserved_one_unit_at_a_time" computerName="DESKTOP-T0PFEUT" duration="00:00:00.3527312" startTime="2026-09-12T16:15:31.3919171-07:00" endTime="2026-09-12T16:15:31.3920715-07:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="7fc8f746-2546-452b-9c22-7a7742dc3234" />
+    <UnitTestResult executionId="c1460c47-f694-4f3a-9aaa-da4ab18be416" testId="81a3c43d-f573-4c05-e4d0-a5d0585ee607" testName="Netgum.Tests.Domain.ProductTests.Coupon_uses_the_larger_discount_but_never_exceeds_subtotal" computerName="DESKTOP-T0PFEUT" duration="00:00:00.0369767" startTime="2026-09-12T16:15:31.6285125-07:00" endTime="2026-09-12T16:15:31.6285128-07:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="c1460c47-f694-4f3a-9aaa-da4ab18be416" />
+    <UnitTestResult executionId="d715472e-0d1b-4053-b45c-6f66267e38da" testId="170204fc-741f-6953-748a-0e2483f6b8ad" testName="Netgum.Tests.Application.CheckoutServiceTests.Checkout_session_creates_pending_order_and_completion_fulfills_it" computerName="DESKTOP-T0PFEUT" duration="00:00:00.0569691" startTime="2026-09-12T16:15:49.0536949-07:00" endTime="2026-09-12T16:15:49.0536958-07:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="d715472e-0d1b-4053-b45c-6f66267e38da" />
+    <UnitTestResult executionId="1b2cf5e7-3904-4241-a77b-b954b1bfa6fc" testId="52fab940-c1d1-7bf5-333a-bea983cb0c30" testName="Netgum.Tests.Application.CheckoutServiceTests.InvalidCustomerInput_DoesNotCallGatewayOrReserve(email: &quot;reader@example.com&quot;, name: &quot;&quot;)" computerName="DESKTOP-T0PFEUT" duration="00:00:14.5633873" startTime="2026-09-12T16:15:44.7187075-07:00" endTime="2026-09-12T16:15:44.7187082-07:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="1b2cf5e7-3904-4241-a77b-b954b1bfa6fc" />
+    <UnitTestResult executionId="9cd1b515-0f1b-4cdb-a9af-290418ed39e9" testId="0183fab5-1371-f243-2993-1084516f0664" testName="Netgum.Tests.Domain.ProductTests.Publish_requires_at_least_one_downloadable_asset" computerName="DESKTOP-T0PFEUT" duration="00:00:00.0154494" startTime="2026-09-12T16:15:31.4851394-07:00" endTime="2026-09-12T16:15:31.4851396-07:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="9cd1b515-0f1b-4cdb-a9af-290418ed39e9" />
+    <UnitTestResult executionId="d86faf21-f42e-43a4-a94a-3d2134b36282" testId="346fbcfd-4319-756f-d89f-73b59ceecd99" testName="Netgum.Tests.Application.CheckoutServiceTests.Completion_IsTerminalAndSendsReceiptOnlyOnce" computerName="DESKTOP-T0PFEUT" duration="00:00:03.8670772" startTime="2026-09-12T16:15:48.9092672-07:00" endTime="2026-09-12T16:15:48.9092682-07:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="d86faf21-f42e-43a4-a94a-3d2134b36282" />
+  </Results>
+  <TestDefinitions>
+    <UnitTest name="Netgum.Tests.Application.CheckoutServiceTests.SoldOutVariant_DoesNotCallGatewayOrChangeTrackedInventory" storage="c:\users\owner\desktop\astraorganized2\astra-remaining-improvements\stage\028086674b89\tests\netgum.tests\bin\release\net8.0\netgum.tests.dll" id="0702bc43-ecda-2331-527c-8a943627406d">
+      <Execution id="087e6223-389c-4da7-8122-37e029872591" />
+      <TestMethod codeBase="C:\Users\Owner\Desktop\AstraOrganized2\astra-remaining-improvements\stage\028086674b89\tests\Netgum.Tests\bin\Release\net8.0\Netgum.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="Netgum.Tests.Application.CheckoutServiceTests" name="SoldOutVariant_DoesNotCallGatewayOrChangeTrackedInventory" />
+    </UnitTest>
+    <UnitTest name="Netgum.Tests.Application.CheckoutServiceTests.InvalidCustomerInput_DoesNotCallGatewayOrReserve(email: &quot;reader@example.com&quot;, name: &quot;&quot;)" storage="c:\users\owner\desktop\astraorganized2\astra-remaining-improvements\stage\028086674b89\tests\netgum.tests\bin\release\net8.0\netgum.tests.dll" id="52fab940-c1d1-7bf5-333a-bea983cb0c30">
+      <Execution id="1b2cf5e7-3904-4241-a77b-b954b1bfa6fc" />
+      <TestMethod codeBase="C:\Users\Owner\Desktop\AstraOrganized2\astra-remaining-improvements\stage\028086674b89\tests\Netgum.Tests\bin\Release\net8.0\Netgum.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="Netgum.Tests.Application.CheckoutServiceTests" name="InvalidCustomerInput_DoesNotCallGatewayOrReserve" />
+    </UnitTest>
+    <UnitTest name="Netgum.Tests.Domain.ProductTests.Variant_inventory_is_reserved_one_unit_at_a_time" storage="c:\users\owner\desktop\astraorganized2\astra-remaining-improvements\stage\028086674b89\tests\netgum.tests\bin\release\net8.0\netgum.tests.dll" id="0b870ff2-a3b7-dd10-969c-541b65446f44">
+      <Execution id="7fc8f746-2546-452b-9c22-7a7742dc3234" />
+      <TestMethod codeBase="C:\Users\Owner\Desktop\AstraOrganized2\astra-remaining-improvements\stage\028086674b89\tests\Netgum.Tests\bin\Release\net8.0\Netgum.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="Netgum.Tests.Domain.ProductTests" name="Variant_inventory_is_reserved_one_unit_at_a_time" />
+    </UnitTest>
+    <UnitTest name="Netgum.Tests.Application.CheckoutServiceTests.Completion_IsTerminalAndSendsReceiptOnlyOnce" storage="c:\users\owner\desktop\astraorganized2\astra-remaining-improvements\stage\028086674b89\tests\netgum.tests\bin\release\net8.0\netgum.tests.dll" id="346fbcfd-4319-756f-d89f-73b59ceecd99">
+      <Execution id="d86faf21-f42e-43a4-a94a-3d2134b36282" />
+      <TestMethod codeBase="C:\Users\Owner\Desktop\AstraOrganized2\astra-remaining-improvements\stage\028086674b89\tests\Netgum.Tests\bin\Release\net8.0\Netgum.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="Netgum.Tests.Application.CheckoutServiceTests" name="Completion_IsTerminalAndSendsReceiptOnlyOnce" />
+    </UnitTest>
+    <UnitTest name="Netgum.Tests.Application.CheckoutServiceTests.Checkout_session_creates_pending_order_and_completion_fulfills_it" storage="c:\users\owner\desktop\astraorganized2\astra-remaining-improvements\stage\028086674b89\tests\netgum.tests\bin\release\net8.0\netgum.tests.dll" id="170204fc-741f-6953-748a-0e2483f6b8ad">
+      <Execution id="d715472e-0d1b-4053-b45c-6f66267e38da" />
+      <TestMethod codeBase="C:\Users\Owner\Desktop\AstraOrganized2\astra-remaining-improvements\stage\028086674b89\tests\Netgum.Tests\bin\Release\net8.0\Netgum.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="Netgum.Tests.Application.CheckoutServiceTests" name="Checkout_session_creates_pending_order_and_completion_fulfills_it" />
+    </UnitTest>
+    <UnitTest name="Netgum.Tests.Domain.ProductTests.Publish_requires_at_least_one_downloadable_asset" storage="c:\users\owner\desktop\astraorganized2\astra-remaining-improvements\stage\028086674b89\tests\netgum.tests\bin\release\net8.0\netgum.tests.dll" id="0183fab5-1371-f243-2993-1084516f0664">
+      <Execution id="9cd1b515-0f1b-4cdb-a9af-290418ed39e9" />
+      <TestMethod codeBase="C:\Users\Owner\Desktop\AstraOrganized2\astra-remaining-improvements\stage\028086674b89\tests\Netgum.Tests\bin\Release\net8.0\Netgum.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="Netgum.Tests.Domain.ProductTests" name="Publish_requires_at_least_one_downloadable_asset" />
+    </UnitTest>
+    <UnitTest name="Netgum.Tests.Application.CheckoutServiceTests.InactiveVariant_DoesNotCallGatewayOrChangeTrackedInventory" storage="c:\users\owner\desktop\astraorganized2\astra-remaining-improvements\stage\028086674b89\tests\netgum.tests\bin\release\net8.0\netgum.tests.dll" id="c3e3b2ba-5ee0-c0a9-e00c-9dd7d18c5c5b">
+      <Execution id="d402be30-1d83-4fc8-be77-ef9058ded2c3" />
+      <TestMethod codeBase="C:\Users\Owner\Desktop\AstraOrganized2\astra-remaining-improvements\stage\028086674b89\tests\Netgum.Tests\bin\Release\net8.0\Netgum.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="Netgum.Tests.Application.CheckoutServiceTests" name="InactiveVariant_DoesNotCallGatewayOrChangeTrackedInventory" />
+    </UnitTest>
+    <UnitTest name="Netgum.Tests.Application.CheckoutServiceTests.InvalidCustomerInput_DoesNotCallGatewayOrReserve(email: &quot;invalid-email&quot;, name: &quot;Reader Person&quot;)" storage="c:\users\owner\desktop\astraorganized2\astra-remaining-improvements\stage\028086674b89\tests\netgum.tests\bin\release\net8.0\netgum.tests.dll" id="4161a339-6619-0bd6-1817-a06cd0198022">
+      <Execution id="af332c9a-4fda-45de-a5e0-26cb174e430a" />
+      <TestMethod codeBase="C:\Users\Owner\Desktop\AstraOrganized2\astra-remaining-improvements\stage\028086674b89\tests\Netgum.Tests\bin\Release\net8.0\Netgum.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="Netgum.Tests.Application.CheckoutServiceTests" name="InvalidCustomerInput_DoesNotCallGatewayOrReserve" />
+    </UnitTest>
+    <UnitTest name="Netgum.Tests.Application.CheckoutServiceTests.FailedCompletion_IsTerminalWithoutDuplicateProviderCall" storage="c:\users\owner\desktop\astraorganized2\astra-remaining-improvements\stage\028086674b89\tests\netgum.tests\bin\release\net8.0\netgum.tests.dll" id="0f75b73c-39ae-3fda-b623-c7eef4a041b6">
+      <Execution id="8819c1ac-e17f-40ff-9b6e-274b4ba14606" />
+      <TestMethod codeBase="C:\Users\Owner\Desktop\AstraOrganized2\astra-remaining-improvements\stage\028086674b89\tests\Netgum.Tests\bin\Release\net8.0\Netgum.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="Netgum.Tests.Application.CheckoutServiceTests" name="FailedCompletion_IsTerminalWithoutDuplicateProviderCall" />
+    </UnitTest>
+    <UnitTest name="Netgum.Tests.Domain.ProductTests.Coupon_uses_the_larger_discount_but_never_exceeds_subtotal" storage="c:\users\owner\desktop\astraorganized2\astra-remaining-improvements\stage\028086674b89\tests\netgum.tests\bin\release\net8.0\netgum.tests.dll" id="81a3c43d-f573-4c05-e4d0-a5d0585ee607">
+      <Execution id="c1460c47-f694-4f3a-9aaa-da4ab18be416" />
+      <TestMethod codeBase="C:\Users\Owner\Desktop\AstraOrganized2\astra-remaining-improvements\stage\028086674b89\tests\Netgum.Tests\bin\Release\net8.0\Netgum.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="Netgum.Tests.Domain.ProductTests" name="Coupon_uses_the_larger_discount_but_never_exceeds_subtotal" />
+    </UnitTest>
+    <UnitTest name="Netgum.Tests.Application.CheckoutServiceTests.ExpiredCoupon_DoesNotCallGatewayOrRedeemCoupon" storage="c:\users\owner\desktop\astraorganized2\astra-remaining-improvements\stage\028086674b89\tests\netgum.tests\bin\release\net8.0\netgum.tests.dll" id="c87c00e6-5913-29ec-57e2-e7f4d5a34aa9">
+      <Execution id="72f62673-a948-4802-b8ea-49970a13e192" />
+      <TestMethod codeBase="C:\Users\Owner\Desktop\AstraOrganized2\astra-remaining-improvements\stage\028086674b89\tests\Netgum.Tests\bin\Release\net8.0\Netgum.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="Netgum.Tests.Application.CheckoutServiceTests" name="ExpiredCoupon_DoesNotCallGatewayOrRedeemCoupon" />
+    </UnitTest>
+  </TestDefinitions>
+  <TestEntries>
+    <TestEntry testId="0702bc43-ecda-2331-527c-8a943627406d" executionId="087e6223-389c-4da7-8122-37e029872591" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="0f75b73c-39ae-3fda-b623-c7eef4a041b6" executionId="8819c1ac-e17f-40ff-9b6e-274b4ba14606" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="c87c00e6-5913-29ec-57e2-e7f4d5a34aa9" executionId="72f62673-a948-4802-b8ea-49970a13e192" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="c3e3b2ba-5ee0-c0a9-e00c-9dd7d18c5c5b" executionId="d402be30-1d83-4fc8-be77-ef9058ded2c3" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="4161a339-6619-0bd6-1817-a06cd0198022" executionId="af332c9a-4fda-45de-a5e0-26cb174e430a" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="0b870ff2-a3b7-dd10-969c-541b65446f44" executionId="7fc8f746-2546-452b-9c22-7a7742dc3234" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="81a3c43d-f573-4c05-e4d0-a5d0585ee607" executionId="c1460c47-f694-4f3a-9aaa-da4ab18be416" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="170204fc-741f-6953-748a-0e2483f6b8ad" executionId="d715472e-0d1b-4053-b45c-6f66267e38da" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="52fab940-c1d1-7bf5-333a-bea983cb0c30" executionId="1b2cf5e7-3904-4241-a77b-b954b1bfa6fc" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="0183fab5-1371-f243-2993-1084516f0664" executionId="9cd1b515-0f1b-4cdb-a9af-290418ed39e9" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="346fbcfd-4319-756f-d89f-73b59ceecd99" executionId="d86faf21-f42e-43a4-a94a-3d2134b36282" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+  </TestEntries>
+  <TestLists>
+    <TestList name="Results Not in a List" id="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestList name="All Loaded Results" id="19431567-8539-422a-85d7-44ee4e166bda" />
+  </TestLists>
+  <ResultSummary outcome="Completed">
+    <Counters total="11" executed="11" passed="11" failed="0" error="0" timeout="0" aborted="0" inconclusive="0" passedButRunAborted="0" notRunnable="0" notExecuted="0" disconnected="0" warning="0" completed="0" inProgress="0" pending="0" />
+    <Output>
+      <StdOut>[xUnit.net 00:00:00.02] xUnit.net VSTest Adapter v2.8.1+ce9211e970 (64-bit .NET 10.0.10)&#xD;
+[xUnit.net 00:00:00.91]   Discovering: Netgum.Tests&#xD;
+[xUnit.net 00:00:01.52]   Discovered:  Netgum.Tests&#xD;
+[xUnit.net 00:00:01.56]   Starting:    Netgum.Tests&#xD;
+[xUnit.net 00:00:21.23]   Finished:    Netgum.Tests&#xD;
+</StdOut>
+    </Output>
+  </ResultSummary>
+</TestRun>
