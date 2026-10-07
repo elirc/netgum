@@ -49,7 +49,7 @@ The ellipses identify an excerpt, not a copy-paste method. The actual file has t
 
 ## Solutions 6–7: terminal completion
 
-`CompleteOrderAsync` loads the product name, then returns immediately when `order.PaymentStatus` is Paid or Failed. Pending orders query the gateway. The success test checks `payments.StatusCalls == 1`, `email.Calls == 1`, and `unitOfWork.SaveCalls == 2` after two completion calls. The failure test checks status calls one, email zero, and saves two. The second call does not invoke `MarkPaid` or `MarkPaymentFailed`; terminal state is the persisted guard.
+`CompleteOrderAsync` returns immediately for a Failed order (`CheckoutService.cs:102-105`) without loading the product; for any other status it loads the product name (line 107-108), returns immediately for Paid (109-112), and only Pending orders query the gateway (114). The success test checks `payments.StatusCalls == 1`, `email.Calls == 1`, and `unitOfWork.SaveCalls == 2` after two completion calls. The failure test checks status calls one, email zero, and saves two. The second call does not invoke `MarkPaid` or `MarkPaymentFailed`; terminal state is the persisted guard.
 
 ## Solution 8: ledger and limitation
 
@@ -59,295 +59,35 @@ Invalid customer: zero provider, zero inventory/coupon/order mutation. Sold-out/
 
 A production command would authenticate creator and customer, validate an idempotency key, reserve stock with a conditional database update, create or reuse a provider intent, and persist an order plus outbox event in a transaction. A webhook would verify provider signatures before completing. The current app does none of this; its demo creator mutation routes lack authentication and download checks only paid order ID. Keep those follow-up risks in the review.
 
-## Complete executable fixture
+## The executable fixture
 
-The following is the complete current `tests/Netgum.Tests/Application/CheckoutServiceTests.cs`, including imports, namespace, fixture graph and helper doubles. These tests already exist: modify the original methods when practicing instead of adding duplicate method names. Sold-out and inactive variants are separate cases so one guard cannot hide a failure in the other. The original no-coupon case provides a positive total assertion; the valid coupon case covers reservation, redemption and sequential repeated completion.
+The full fixture is the checked-in file
+[`tests/Netgum.Tests/Application/CheckoutServiceTests.cs`](../tests/Netgum.Tests/Application/CheckoutServiceTests.cs).
+An earlier version of this chapter pasted all 290 lines here; that copy was
+removed on 2026-10-06 because it duplicated the file verbatim and would drift
+from it. What to read in it:
 
-```csharp
-using FluentAssertions;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging.Abstractions;
-using Xunit;
+| Lines | What |
+|---|---|
+| 22-61 | `Checkout_session_creates_pending_order_and_completion_fulfills_it` (no variant, no coupon; total 51.45) |
+| 63-80 | `InvalidCustomerInput_DoesNotCallGatewayOrReserve` (`[Theory]`, 2 rows) |
+| 82-117 | `SoldOutVariant_...` and `InactiveVariant_...` |
+| 119-136 | `ExpiredCoupon_DoesNotCallGatewayOrRedeemCoupon` |
+| 138-186 | `Completion_IsTerminalAndSendsReceiptOnlyOnce` and `FailedCompletion_IsTerminalWithoutDuplicateProviderCall` |
+| 188-243 | helpers: `CreateDbContext`, two `CreateService` overloads, `AddPublishedProduct(dbContext, int? stock, bool withValidCoupon = false)` |
+| 245-283 | `CountingPaymentGateway`, `CountingEmailSender`, `CountingUnitOfWork` |
 
-using Netgum.Application.Abstractions;
-using Netgum.Application.Checkout;
-using Netgum.Domain.Abstractions;
-using Netgum.Domain.Creators;
-using Netgum.Domain.Products;
-using Netgum.Domain.ValueObjects;
-using Netgum.Infrastructure;
-using Netgum.Infrastructure.Email;
-using Netgum.Infrastructure.Payments;
-using Netgum.Infrastructure.Persistence;
-using Netgum.Domain.Orders;
+Together with `Domain/EmailAddressTests.cs` (3) and `Domain/ProductTests.cs`
+(3), the project has 14 test cases: 8 application, 6 domain.
 
-namespace Netgum.Tests.Application;
+## Lab answers
 
-public sealed class CheckoutServiceTests
-{
-    [Fact]
-    public async Task Checkout_session_creates_pending_order_and_completion_fulfills_it()
-    {
-        await using var dbContext = CreateDbContext();
-        var creator = Creator.Register("Ada Goods", "ada-goods", "ada@example.com");
-        var product = Product.Create(
-            creator.Id,
-            "Indie SaaS Playbook",
-            "indie-saas-playbook",
-            "A practical guide for solo founders.",
-            Money.Create(49m, "USD"));
-        product.AddAsset("playbook.pdf", "products/playbook.pdf", "application/pdf", 42_000);
-        product.Publish(DateTimeOffset.UtcNow);
-
-        dbContext.Creators.Add(creator);
-        dbContext.Products.Add(product);
-        await dbContext.SaveChangesAsync();
-
-        var service = CreateService(dbContext);
-        var checkout = await service.CreateSessionAsync(
-            new CreateCheckoutRequest(
-                "ada-goods",
-                "indie-saas-playbook",
-                null,
-                null,
-                "reader@example.com",
-                "Reader Person"),
-            CancellationToken.None);
-
-        checkout.Total.Should().Be(51.45m);
-        checkout.PaymentIntentId.Should().StartWith("fake_pi_");
-
-        var receipt = await service.CompleteOrderAsync(
-            new CompleteOrderRequest(checkout.PaymentIntentId),
-            CancellationToken.None);
-
-        receipt.PaymentStatus.Should().Be(Netgum.Domain.Orders.PaymentStatus.Paid);
-        receipt.OrderStatus.Should().Be(Netgum.Domain.Orders.OrderStatus.Fulfilled);
-        receipt.LicenseKey.Should().NotBeNullOrWhiteSpace();
-    }
-
-    [Theory]
-    [InlineData("invalid-email", "Reader Person")]
-    [InlineData("reader@example.com", "")]
-    public async Task InvalidCustomerInput_DoesNotCallGatewayOrReserve(string email, string name)
-    {
-        await using var dbContext = CreateDbContext();
-        var product = AddPublishedProduct(dbContext, stock: 2);
-        var payments = new CountingPaymentGateway();
-        var service = CreateService(dbContext, payments, new CountingEmailSender());
-
-        var act = () => service.CreateSessionAsync(new CreateCheckoutRequest(
-            "ada-goods", "indie-saas-playbook", product.Variants.Single().Id, null, email, name), CancellationToken.None);
-
-        await act.Should().ThrowAsync<DomainException>();
-        product.Variants.Single().StockQuantity.Should().Be(2);
-        payments.CreateCalls.Should().Be(0);
-        (await dbContext.Orders.CountAsync()).Should().Be(0);
-    }
-
-    [Fact]
-    public async Task SoldOutVariant_DoesNotCallGatewayOrChangeTrackedInventory()
-    {
-        await using var dbContext = CreateDbContext();
-        var product = AddPublishedProduct(dbContext, stock: 0);
-        var payments = new CountingPaymentGateway();
-        var service = CreateService(dbContext, payments, new CountingEmailSender());
-
-        await service.Invoking(s => s.CreateSessionAsync(new CreateCheckoutRequest(
-            "ada-goods", "indie-saas-playbook", product.Variants.Single().Id, null,
-            "reader@example.com", "Reader Person"), CancellationToken.None))
-            .Should().ThrowAsync<DomainException>();
-
-        product.Variants.Single().StockQuantity.Should().Be(0);
-        payments.CreateCalls.Should().Be(0);
-    }
-
-    [Fact]
-    public async Task InactiveVariant_DoesNotCallGatewayOrChangeTrackedInventory()
-    {
-        await using var dbContext = CreateDbContext();
-        var product = AddPublishedProduct(dbContext, stock: 2);
-        var variant = product.Variants.Single();
-        variant.Deactivate();
-        var payments = new CountingPaymentGateway();
-        var service = CreateService(dbContext, payments, new CountingEmailSender());
-
-        await service.Invoking(s => s.CreateSessionAsync(new CreateCheckoutRequest(
-            "ada-goods", "indie-saas-playbook", variant.Id, null,
-            "reader@example.com", "Reader Person"), CancellationToken.None))
-            .Should().ThrowAsync<DomainException>();
-
-        variant.StockQuantity.Should().Be(2);
-        payments.CreateCalls.Should().Be(0);
-        (await dbContext.Orders.CountAsync()).Should().Be(0);
-    }
-
-    [Fact]
-    public async Task ExpiredCoupon_DoesNotCallGatewayOrRedeemCoupon()
-    {
-        await using var dbContext = CreateDbContext();
-        var product = AddPublishedProduct(dbContext, stock: 1);
-        var coupon = product.AddCoupon("OLD10", 10, null, 5, new DateTimeOffset(2026, 1, 1, 0, 0, 0, TimeSpan.Zero));
-        var payments = new CountingPaymentGateway();
-        var service = CreateService(dbContext, payments, new CountingEmailSender());
-
-        await service.Invoking(s => s.CreateSessionAsync(new CreateCheckoutRequest(
-            "ada-goods", "indie-saas-playbook", product.Variants.Single().Id, "old10",
-            "reader@example.com", "Reader Person"), CancellationToken.None))
-            .Should().ThrowAsync<DomainException>();
-
-        coupon.RedeemedCount.Should().Be(0);
-        product.Variants.Single().StockQuantity.Should().Be(1);
-        payments.CreateCalls.Should().Be(0);
-    }
-
-    [Fact]
-    public async Task Completion_IsTerminalAndSendsReceiptOnlyOnce()
-    {
-        await using var dbContext = CreateDbContext();
-        var product = AddPublishedProduct(dbContext, stock: 1, withValidCoupon: true);
-        var coupon = product.Coupons.Single();
-        var payments = new CountingPaymentGateway { Status = PaymentIntentStatus.Succeeded };
-        var email = new CountingEmailSender();
-        var unitOfWork = new CountingUnitOfWork(dbContext);
-        var service = CreateService(dbContext, payments, email, unitOfWork);
-
-        var checkout = await service.CreateSessionAsync(new CreateCheckoutRequest(
-            "ada-goods", "indie-saas-playbook", product.Variants.Single().Id, "save10",
-            "reader@example.com", "Reader Person"), CancellationToken.None);
-        var first = await service.CompleteOrderAsync(new CompleteOrderRequest(checkout.PaymentIntentId), CancellationToken.None);
-        var second = await service.CompleteOrderAsync(new CompleteOrderRequest(checkout.PaymentIntentId), CancellationToken.None);
-
-        first.PaymentStatus.Should().Be(PaymentStatus.Paid);
-        second.Should().BeEquivalentTo(first);
-        product.Variants.Single().StockQuantity.Should().Be(0);
-        coupon.RedeemedCount.Should().Be(1);
-        payments.CreateCalls.Should().Be(1);
-        payments.StatusCalls.Should().Be(1);
-        email.Calls.Should().Be(1);
-        unitOfWork.SaveCalls.Should().Be(2);
-    }
-
-    [Fact]
-    public async Task FailedCompletion_IsTerminalWithoutDuplicateProviderCall()
-    {
-        await using var dbContext = CreateDbContext();
-        var product = AddPublishedProduct(dbContext, stock: null);
-        var payments = new CountingPaymentGateway { Status = PaymentIntentStatus.Failed };
-        var email = new CountingEmailSender();
-        var unitOfWork = new CountingUnitOfWork(dbContext);
-        var service = CreateService(dbContext, payments, email, unitOfWork);
-
-        var checkout = await service.CreateSessionAsync(new CreateCheckoutRequest(
-            "ada-goods", "indie-saas-playbook", null, null,
-            "reader@example.com", "Reader Person"), CancellationToken.None);
-        var first = await service.CompleteOrderAsync(new CompleteOrderRequest(checkout.PaymentIntentId), CancellationToken.None);
-        var second = await service.CompleteOrderAsync(new CompleteOrderRequest(checkout.PaymentIntentId), CancellationToken.None);
-
-        first.PaymentStatus.Should().Be(PaymentStatus.Failed);
-        second.PaymentStatus.Should().Be(PaymentStatus.Failed);
-        payments.StatusCalls.Should().Be(1);
-        email.Calls.Should().Be(0);
-        unitOfWork.SaveCalls.Should().Be(2);
-    }
-
-    private static NetgumDbContext CreateDbContext()
-    {
-        var options = new DbContextOptionsBuilder<NetgumDbContext>()
-            .UseInMemoryDatabase(Guid.NewGuid().ToString("N"))
-            .Options;
-
-        return new NetgumDbContext(options);
-    }
-
-    private static CheckoutService CreateService(NetgumDbContext dbContext)
-    {
-        IOrderRepository orders = new OrderRepository(dbContext);
-        IProductRepository products = new ProductRepository(dbContext);
-        IPaymentGateway payments = new FakePaymentGateway();
-        IEmailSender email = new ConsoleEmailSender(NullLogger<ConsoleEmailSender>.Instance);
-
-        return new CheckoutService(
-            new SystemClock(),
-            email,
-            orders,
-            payments,
-            products,
-            dbContext);
-    }
-
-    private static CheckoutService CreateService(
-        NetgumDbContext dbContext,
-        CountingPaymentGateway payments,
-        CountingEmailSender email,
-        CountingUnitOfWork? unitOfWork = null) =>
-        new(
-            new FixedClock(new DateTimeOffset(2026, 4, 1, 12, 0, 0, TimeSpan.Zero)),
-            email,
-            new OrderRepository(dbContext),
-            payments,
-            new ProductRepository(dbContext),
-            unitOfWork ?? new CountingUnitOfWork(dbContext));
-
-    private static Product AddPublishedProduct(NetgumDbContext dbContext, int? stock, bool withValidCoupon = false)
-    {
-        var creator = Creator.Register("Ada Goods", "ada-goods", "ada@example.com");
-        var product = Product.Create(creator.Id, "Indie SaaS Playbook", "indie-saas-playbook", "A practical guide for solo founders.", Money.Create(49m, "USD"));
-        product.AddAsset("playbook.pdf", "products/playbook.pdf", "application/pdf", 42_000);
-        product.AddVariant("Standard", Money.ZeroUsd, stock);
-        if (withValidCoupon)
-        {
-            product.AddCoupon("SAVE10", 10, null, 5, new DateTimeOffset(2099, 1, 1, 0, 0, 0, TimeSpan.Zero));
-        }
-        product.Publish(new DateTimeOffset(2026, 3, 1, 0, 0, 0, TimeSpan.Zero));
-        dbContext.Creators.Add(creator);
-        dbContext.Products.Add(product);
-        dbContext.SaveChanges();
-        return product;
-    }
-
-    private sealed record FixedClock(DateTimeOffset UtcNow) : IClock;
-
-    private sealed class CountingPaymentGateway : IPaymentGateway
-    {
-        public int CreateCalls { get; private set; }
-        public int StatusCalls { get; private set; }
-        public PaymentIntentStatus Status { get; init; } = PaymentIntentStatus.Processing;
-
-        public Task<PaymentIntent> CreatePaymentIntentAsync(PaymentIntentRequest request, CancellationToken cancellationToken)
-        {
-            CreateCalls++;
-            return Task.FromResult(new PaymentIntent("pi_test", new Uri("https://pay.test/checkout"), PaymentIntentStatus.Processing));
-        }
-
-        public Task<PaymentIntentStatus> GetPaymentIntentStatusAsync(string paymentIntentId, CancellationToken cancellationToken)
-        {
-            StatusCalls++;
-            return Task.FromResult(Status);
-        }
-    }
-
-    private sealed class CountingEmailSender : IEmailSender
-    {
-        public int Calls { get; private set; }
-        public Task SendPurchaseReceiptAsync(PurchaseReceiptEmail email, CancellationToken cancellationToken)
-        {
-            Calls++;
-            return Task.CompletedTask;
-        }
-    }
-
-    private sealed class CountingUnitOfWork(NetgumDbContext dbContext) : IUnitOfWork
-    {
-        public int SaveCalls { get; private set; }
-        public async Task<int> SaveChangesAsync(CancellationToken cancellationToken)
-        {
-            SaveCalls++;
-            return await dbContext.SaveChangesAsync(cancellationToken);
-        }
-    }
-}
-```
+Lab A and Lab B answers are written into the **Check** blocks of chapter 05,
+because the point of both labs is to compare a written prediction with a run.
+The short version: moving `ReserveInventory` alone turns nothing red, since
+`CheckoutService.cs:38` already rejects the inputs that could make
+`CreatePending` throw; the snapshot service turns 6 of the 8 checkout cases red
+and leaves the happy path and expired-coupon cases green.
 
 ## Complete repeated-completion assertions
 
@@ -357,6 +97,30 @@ If a future repository implementation returns a detached order from a new contex
 
 ## What a receipt retry cannot guarantee yet
 
-The service saves Paid before sending the receipt. If the sender throws, the order is already paid; a later call returns early and does not retry the email. Two callers that both loaded Pending can also reach provider/save/email work concurrently because no database version predicate coordinates them. The eleven tests cover sequential service calls, not either failure window. A future outbox should persist a unique order-paid delivery record with the state change and let a retrying worker record delivery attempts; provider idempotency and database concurrency need separate tests. Do not move the email before SaveChanges as a shortcut: that creates a receipt for an order whose paid state may never commit.
+The service saves Paid before sending the receipt. If the sender throws, the order is already paid; a later call returns early and does not retry the email. Two callers that both loaded Pending can also reach provider/save/email work concurrently because no database version predicate coordinates them. The fourteen tests cover sequential service calls, not either failure window. A future outbox should persist a unique order-paid delivery record with the state change and let a retrying worker record delivery attempts; provider idempotency and database concurrency need separate tests. Do not move the email before SaveChanges as a shortcut: that creates a receipt for an order whose paid state may never commit.
 
 Product names are read from the current product on each successful receipt response; they are not frozen on the order. Sequential equivalence in the test assumes the product name has not changed. Coupon eligibility uses the captured command time both before and after the provider await, and the second preflight inspects the same tracked object. It neither refreshes another DbContext's writes nor establishes wall-clock expiry at payment-provider completion.
+
+## Verified review findings outside the repair (checked 2026-10-06)
+
+Statically verified against the current source; none was executed.
+
+**A. "Not found" is reported as 400.** `CheckoutService.cs:42` (product) and
+`:98` (order for payment intent) throw `DomainException`, and the global
+handler in `src/Netgum.Api/Program.cs:52-57` maps every `DomainException` to
+400 "Business rule violation". A client cannot tell a wrong slug from a sold-out
+variant. `Payment has not succeeded yet.` (line 124) is also a 400, although it
+is the one retryable outcome. A reviewer should ask for a typed error (or a
+dedicated exception) per category before a real client depends on these codes.
+
+**B. The checkout `Location` header points at a route that does not exist.**
+`CheckoutEndpoints.cs:17` returns `Results.Created($"/api/orders/{checkout.OrderId}", ...)`,
+but `OrderEndpoints.cs:10-36` maps only `GET /api/orders/{orderId}/download`.
+Following the header yields 404. Either add a `GET /api/orders/{orderId}` or
+return the download/status route that exists.
+
+**C. Completion is triggered by any caller who knows a payment-intent ID.**
+`POST /api/checkout/complete` (`CheckoutEndpoints.cs:22-31`) takes only
+`PaymentIntentId`, with no signature or caller check. With the fake gateway
+this is harmless; with a real provider it is the webhook-verification gap that
+Solution 9 proposes closing.

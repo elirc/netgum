@@ -1,6 +1,6 @@
 # Verification
 
-Run from the delivered `.netgum` project root:
+Run from the repository root (the folder holding `Netgum.sln`):
 
 ```powershell
 $env:DOTNET_ROLL_FORWARD = "Major" # only when the installed runtime is newer than net8.0
@@ -20,9 +20,9 @@ Passed!  - Failed:     0, Passed:    14, Skipped:     0, Total:    14, Duration:
 
 The evidence files below record the earlier 11/11 run; 11 is the delivered count and 14 is the count after the three added parser tests. The `cwd` field inside the evidence JSON names the staging directory the delivery run used (`...\astra-remaining-improvements\stage\028086674b89`), not a path you need; the same commands run from this project root, as the 14/14 line above shows.
 
-The focused application suite uses EF Core InMemory and counting gateway/email/unit-of-work doubles. It should report the original checkout success plus invalid customer, sold-out, expired-coupon, paid-terminal, and failed-terminal tests. The central runner records the actual installed runtime and exit code; a Major roll-forward is local execution evidence, not native .NET 8 coverage.
+The focused application suite uses EF Core InMemory and counting gateway/email/unit-of-work doubles. It reports 8 cases: the original checkout success, two invalid-customer rows, sold-out, inactive, expired-coupon, paid-terminal and failed-terminal (counted from `[Fact]`/`[Theory]`/`[InlineData]` in `CheckoutServiceTests.cs`). The central runner records the actual installed runtime and exit code; a Major roll-forward is local execution evidence, not native .NET 8 coverage.
 
-Original changed files are preserved byte-for-byte under `astraupskill/snapshots/`: checkout service, order, product, product variant, and checkout tests. The course files are UTF-8 additions. Do not include `bin`, `obj`, a database file, payment credentials, or real email configuration in delivery.
+Original changed files are preserved byte-for-byte under `astraupskill/snapshots/`: checkout service, checkout tests, email address, order, product, product variant, and product tests (seven files). The course files are UTF-8 additions. Do not include `bin`, `obj`, a database file, payment credentials, or real email configuration in delivery.
 
 Scope limits are explicit. Fake payments and console email are not external integrations. EF InMemory does not prove relational constraints, SQL transactions, cross-context stock concurrency, or provider compensation. The post-await revalidation reduces stale state but cannot make a distributed payment and database transaction atomic. Creator mutation endpoints have no seller authentication, and download authorization is based on paid order ID. The future idempotency, webhook, owner-check, and outbox designs are teaching extensions, not implemented behavior.
 
@@ -30,4 +30,4 @@ For a focused repeat, run `dotnet test tests/Netgum.Tests/Netgum.Tests.csproj --
 
 The recorded focused run used `DOTNET_ROLL_FORWARD=Major` because the available test host was newer than the target. Its nonempty console log reports 11 total tests and 11 passes, and the TRX file is emitted under the test project's `TestResults` directory. That is execution evidence for this local environment; it does not change the project target or establish native .NET 8 runtime coverage. The restore record is separate from the test record so a future learner can distinguish package resolution from test execution.
 
-The authoritative [results summary](evidence/results.json), [test output](evidence/luna-test-10.log), [TRX counters](evidence/netgum-tests.trx), and [Release build output](evidence/root-build-01.log) are included locally. Eleven discovered cases passed: eight application cases and three domain cases. Earlier failed or empty-output attempts are not the final evidence. No tests were added for production identity, the email failure window, two simultaneous pending completions, or relational rollback. Read the failure-ledger limits in the solutions before treating sequential idempotency as a stronger guarantee.
+The authoritative [results summary](evidence/results.json), [test run record](evidence/luna-test-10.json), [TRX counters](evidence/netgum-tests.trx) (`total="11" passed="11"`), and [Release build record](evidence/root-build-01.json) are included. The JSON records name `.log` files that were not committed, so the TRX is the only per-test evidence in the repository. Eleven discovered cases passed in that 2026-09-12 run: eight application cases and three domain cases (the `EmailAddressTests` came later). Earlier failed or empty-output attempts are not the final evidence. No tests were added for production identity, the email failure window, two simultaneous pending completions, or relational rollback. Read the failure-ledger limits in the solutions before treating sequential idempotency as a stronger guarantee.
